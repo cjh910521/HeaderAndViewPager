@@ -1,45 +1,94 @@
-package com.jianghua.headerandviewpager;
+package com.jianghua.headerandviewpager.fragment;
 
+import android.content.Context;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.util.SparseArrayCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ImageView;
 
+import com.jianghua.headerandviewpager.R;
+import com.jianghua.headerandviewpager.activity.TestTwoSuperActivity;
+import com.jianghua.headerandviewpager.adapter.SlidingHolderAdapter;
+import com.jianghua.headerandviewpager.listener.ScrollTabListener;
+import com.jianghua.headerandviewpager.listener.TransScrollFromAToFListener;
+import com.jianghua.headerandviewpager.widget.SlidingTabLayout;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements ScrollTabHolder{
+/**
+ * 以fragment为容器
+ */
+public class TestTwoFragment extends Fragment {
 
     private ViewPager mViewPager;
     private View mHeader;
     private ImageView mTopImage;
     private SlidingTabLayout mNavigBar;
-    private ViewPagerAdapter mAdapter;
+    private SlidingHolderAdapter mAdapter;
 
     private int mMinHeaderHeight;
     private int mHeaderHeight;
     private int mMinHeaderTranslation;
     private int mNumFragments;
 
+    public TestTwoFragment() {
+        // Required empty public constructor
+    }
+
+    public static Fragment newInstance() {
+        TestTwoFragment fragment = new TestTwoFragment();
+        Bundle args = new Bundle();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_continer, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         initValues();
 
-        mTopImage = (ImageView) findViewById(R.id.image);
-        mViewPager = (ViewPager) findViewById(R.id.view_pager);
-        mNavigBar = (SlidingTabLayout) findViewById(R.id.navig_tab);
-        mHeader = findViewById(R.id.header);
+        mTopImage = (ImageView) view.findViewById(R.id.image);
+        mViewPager = (ViewPager) view.findViewById(R.id.view_pager);
+        mNavigBar = (SlidingTabLayout) view.findViewById(R.id.navig_tab);
+        mHeader = view.findViewById(R.id.header);
 
         setupAdapter();
+
+        super.onViewCreated(view, savedInstanceState);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try {
+            if (context instanceof TestTwoSuperActivity) {
+                ((TestTwoSuperActivity) context).setListener(new TransScrollFromAToFListener() {
+                    @Override
+                    public void onScrollChanged(AbsListView view, int pagePosition) {
+                        if (mViewPager.getCurrentItem() == pagePosition) {
+                            scrollHeader(getScrollY(view));
+                        }
+                    }
+                });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void initValues() {
@@ -58,9 +107,11 @@ public class MainActivity extends AppCompatActivity implements ScrollTabHolder{
         title.add("攻略");
         title.add("旅友");
 
-        if (mAdapter == null) {
-            mAdapter = new ViewPagerAdapter(getSupportFragmentManager(), mNumFragments, title);
+        List<Fragment> mFragments = new ArrayList<>();
+        for (int i = 0; i < mNumFragments; i++) {
+            mFragments.add(ListViewFragment.newInstance(i));
         }
+        mAdapter = new SlidingHolderAdapter(getChildFragmentManager(), mFragments, title);
 
         mViewPager.setAdapter(mAdapter);
         mViewPager.setOffscreenPageLimit(mNumFragments);
@@ -74,9 +125,9 @@ public class MainActivity extends AppCompatActivity implements ScrollTabHolder{
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                 int currentItem = mViewPager.getCurrentItem();
                 if (positionOffsetPixels > 0) {
-                    SparseArrayCompat<ScrollTabHolder> scrollTabHolders = mAdapter.getScrollTabHolders();
+                    SparseArrayCompat<ScrollTabListener> scrollTabHolders = mAdapter.getScrollTabHolders();
 
-                    ScrollTabHolder fragmentContent;
+                    ScrollTabListener fragmentContent;
                     if (position < currentItem) {
                         // Revealed the previous page
                         fragmentContent = scrollTabHolders.valueAt(position);
@@ -85,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements ScrollTabHolder{
                         fragmentContent = scrollTabHolders.valueAt(position + 1);
                     }
 
-//                    Log.d(TAG, "header height " + mHeader.getHeight() + " translationY " + mHeader.getTranslationY());
+                    //左右滑动切换时，让左右的listView滑动到相同位置
                     fragmentContent.adjustScroll((int) (mHeader.getHeight() + mHeader.getTranslationY()),
                             mHeader.getHeight());
                 }
@@ -93,13 +144,15 @@ public class MainActivity extends AppCompatActivity implements ScrollTabHolder{
 
             @Override
             public void onPageSelected(int position) {
-                SparseArrayCompat<ScrollTabHolder> scrollTabHolders = mAdapter.getScrollTabHolders();
+                SparseArrayCompat<ScrollTabListener> scrollTabHolders = mAdapter.getScrollTabHolders();
 
                 if (scrollTabHolders == null || scrollTabHolders.size() != mNumFragments) {
                     return;
                 }
 
-                ScrollTabHolder currentHolder = scrollTabHolders.valueAt(position);
+                ScrollTabListener currentHolder = scrollTabHolders.valueAt(position);
+
+                //点击tab切换时，让跳转前后的listView滑动到相同位置
                 currentHolder.adjustScroll(
                         (int) (mHeader.getHeight() + mHeader.getTranslationY()),
                         mHeader.getHeight());
@@ -113,23 +166,17 @@ public class MainActivity extends AppCompatActivity implements ScrollTabHolder{
         return listener;
     }
 
-    @Override
-    public void adjustScroll(int scrollHeight, int headerHeight) {
-    }
-
-    @Override
-    public void onListViewScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount, int pagePosition) {
-        if (mViewPager.getCurrentItem() == pagePosition) {
-            scrollHeader(getScrollY(view));
-        }
-    }
-
+    /**
+     * 滑动头部
+     */
     private void scrollHeader(int scrollY) {
         float translationY = Math.max(-scrollY, mMinHeaderTranslation);
         mHeader.setTranslationY(translationY);
-//        mTopImage.setTranslationY(-translationY / 3);
     }
 
+    /**
+     * 计算header需要滑动的距离
+     */
     private int getScrollY(AbsListView view) {
         View child = view.getChildAt(0);
         if (child == null) {
@@ -147,52 +194,5 @@ public class MainActivity extends AppCompatActivity implements ScrollTabHolder{
         return -top + firstVisiblePosition * child.getHeight() + headerHeight;
     }
 
-    private static class ViewPagerAdapter extends FragmentPagerAdapter {
-
-        private SparseArrayCompat<ScrollTabHolder> mScrollTabHolders;
-        private int mNumFragments;
-        private List<String> mTitles;
-
-        public ViewPagerAdapter(FragmentManager fm, int numFragments, List<String> titles) {
-            super(fm);
-            mScrollTabHolders = new SparseArrayCompat<>();
-            mNumFragments = numFragments;
-            mTitles = titles;
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            Fragment fragment = ListViewFragment.newInstance(position);
-            return fragment;
-        }
-
-        @Override
-        public Object instantiateItem(ViewGroup container, int position) {
-            Object object = super.instantiateItem(container, position);
-
-            mScrollTabHolders.put(position, (ScrollTabHolder) object);
-
-            return object;
-        }
-
-        @Override
-        public int getCount() {
-            return mNumFragments;
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return mTitles.get(position);
-        }
-
-        @Override
-        public int getItemPosition(Object object) {
-            return POSITION_NONE;
-        }
-
-        public SparseArrayCompat<ScrollTabHolder> getScrollTabHolders() {
-            return mScrollTabHolders;
-        }
-    }
 
 }

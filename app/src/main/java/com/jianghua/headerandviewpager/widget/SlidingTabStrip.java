@@ -1,4 +1,4 @@
-package com.jianghua.headerandviewpager;
+package com.jianghua.headerandviewpager.widget;
 
 import android.content.Context;
 import android.graphics.Canvas;

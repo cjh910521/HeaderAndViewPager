@@ -1,4 +1,4 @@
-package com.jianghua.headerandviewpager;
+package com.jianghua.headerandviewpager.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -16,6 +16,8 @@ import android.view.ViewGroup;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.jianghua.headerandviewpager.R;
 
 
 /**

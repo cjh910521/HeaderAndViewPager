@@ -1,4 +1,4 @@
-package com.jianghua.headerandviewpager;
+package com.jianghua.headerandviewpager.fragment;
 
 
 import android.os.Bundle;
@@ -10,8 +10,11 @@ import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.jianghua.headerandviewpager.R;
+
 /**
  * A simple {@link Fragment} subclass.
+ * 将其中的listView滑动事件，通过mScrollTabHolder传递给它外面的activity
  */
 public class ListViewFragment extends ScrollTabHolderFragment {
 
@@ -37,6 +40,7 @@ public class ListViewFragment extends ScrollTabHolderFragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_list_view, container, false);
         mListView = (ListView) view.findViewById(R.id.listview);
+
         View placeHolderView = inflater.inflate(R.layout.header_placeholder, mListView, false);
         mListView.addHeaderView(placeHolderView);
 
@@ -83,6 +87,7 @@ public class ListViewFragment extends ScrollTabHolderFragment {
             return;
         }
 
+        //此处作用是左右切换时，让切换前后的listView自动滑动到相同的位置，避免跳动
         mListView.setSelectionFromTop(1, scrollHeight);
     }
 }

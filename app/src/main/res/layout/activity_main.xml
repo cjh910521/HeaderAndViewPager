@@ -1,39 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/parent_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v4.view.ViewPager
-        android:id="@+id/view_pager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+    <Button
+        android:id="@+id/create_in_activity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:text="在activity中" />
 
-    <LinearLayout
-        android:id="@+id/header"
-        android:layout_width="match_parent"
-        android:layout_height="250dp"
-        android:orientation="vertical">
+    <Button
+        android:id="@+id/create_in_fragment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:text="在fragment中" />
 
-        <ImageView
-            android:id="@+id/image"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:src="@color/myGreen"
-            android:scaleType="centerCrop"/>
-
-        <com.jianghua.headerandviewpager.SlidingTabLayout
-            android:id="@+id/navig_tab"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:background="@color/white"
-            app:shouldExpand="true"
-            app:indicatorColor="@color/blue"
-            app:tabBackground="@layout/sliding_tab_view"
-            app:tabBackgroundTextViewId="@+id/tab_textview"/>
-
-    </LinearLayout>
-
-</RelativeLayout>
+</LinearLayout>
 

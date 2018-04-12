@@ -1,23 +1,27 @@
-package com.jianghua.headerandviewpager;
+package com.jianghua.headerandviewpager.fragment;
 
-import android.app.Activity;
+import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.widget.AbsListView;
 
+import com.jianghua.headerandviewpager.listener.ScrollTabListener;
+
 /**
  * Created by desmond on 12/4/15.
+ *
  */
-public class ScrollTabHolderFragment extends Fragment implements ScrollTabHolder {
+public class ScrollTabHolderFragment extends Fragment implements ScrollTabListener {
 
-    protected ScrollTabHolder mScrollTabHolder;
+    protected ScrollTabListener mScrollTabHolder;
 
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
         try {
-            mScrollTabHolder = (ScrollTabHolder) activity;
+            mScrollTabHolder = (ScrollTabListener) context;
         }
         catch (final ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement ScrollTabHolder");
+            throw new ClassCastException(context.toString() + " must implement ScrollTabHolder");
         }
     }
 
